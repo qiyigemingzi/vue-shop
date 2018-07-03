@@ -1,5 +1,5 @@
-# mi-shop
-vue项目-小米移动商城开源版，本人业余时间花费一周开发。代码可自由更改，转载请注明出处，切勿用于商业用途。
+# shop
+一个电商项目
 
 ## DEMO
 <div align="center">
@@ -12,8 +12,7 @@ vue项目-小米移动商城开源版，本人业余时间花费一周开发。�
 
 ## 安装
 ```
-  git clone https://github.com/Jon-Millent/mi-shop.git
-  cd mi-shop
+  cd  shop
   npm install
   npm run dev
 ```
@@ -38,5 +37,3 @@ vue项目-小米移动商城开源版，本人业余时间花费一周开发。�
 * 商品详情
   * 加入购物车
 
-## LICENSE
-<a href="http://opensource.org/licenses/MIT">MIT</a>
