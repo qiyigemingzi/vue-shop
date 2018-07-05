@@ -62,6 +62,20 @@ export default new Router({
       }
     },
     {
+      path: '/address',
+      name: 'address',
+      component(resolve){
+        require(['@/views/address/index.vue'], resolve)
+      }
+    },
+    {
+      path: '/order',
+      name: 'order',
+      component(resolve){
+        require(['@/views/order/index.vue'], resolve)
+      }
+    },
+    {
       path: '/pay',
       name: 'pay',
       component(resolve){

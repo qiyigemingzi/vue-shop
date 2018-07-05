@@ -4,8 +4,10 @@ import Vue from 'vue'
 import App from './App'
 import router from './router'
 import store from './store/index'
+// import http from './util/http/index'
 import VueLazyload from 'vue-lazyload'
 
+// Vue.prototype.$http = http
 Vue.use(VueLazyload)
 
 // or with options

@@ -8,24 +8,24 @@
       <p class="fl" @click="$router.openPage('/pay')"> 登录 /  注册 </p>
     </div>
 
-    <div class="dingdan public-padding p-item" @click="$router.openPage('/pay')">
+    <div class="dingdan public-padding p-item" @click="$router.openPage('/order',{id:0})">
       我的订单
     </div>
 
     <div class="tab-box clear">
-      <div class="item" @click="$router.openPage('/pay')">
+      <div class="item" @click="$router.openPage('/order',{id:1})">
         <p class="icon">
           <span class="iconfont icon-qianbao"></span>
         </p>
         <p class="name">待付款</p>
       </div>
-      <div class="item" @click="$router.openPage('/pay')">
+      <div class="item" @click="$router.openPage('/order',{id:3})">
         <p class="icon">
           <span class="iconfont icon-daishouhuo"></span>
         </p>
         <p class="name">待收货</p>
       </div>
-      <div class="item" @click="$router.openPage('/pay')">
+      <div class="item" @click="$router.openPage('/order')">
         <p class="icon">
           <span class="iconfont icon-buoumaotubiao46"></span>
         </p>
@@ -38,9 +38,9 @@
         <span class="iconfont icon-huiyuan" style="color: #FDBF2D;"></span>
         <span>会员福利</span>
       </div>
-      <div class="dingdan public-padding p-item" @click="$router.openPage('/pay')">
+      <div class="dingdan public-padding p-item" @click="$router.openPage('/address')">
         <span class="iconfont icon-qianbao1" style="color: #51BBE0;"></span>
-        <span>我的优惠</span>
+        <span>我的地址</span>
       </div>
     </div>
 
@@ -51,7 +51,7 @@
       </div>
       <div class="dingdan public-padding p-item" @click="$router.openPage('/pay')">
         <span class="iconfont icon-shop" style="color: #FF8B43;"></span>
-        <span>小米之家</span>
+        <span>关于我们</span>
       </div>
     </div>
 

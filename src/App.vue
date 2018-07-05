@@ -1,17 +1,19 @@
 <template>
   <div>
-
+    <!-- 顶部进度条 -->
     <div class="loading-bar" :class="nowStatus">
       <span class="press"></span>
     </div>
-
+    <!-- 页面主体 -->
     <div class="app-init">
       <transition :name="transitionName">
+        <!-- <keep-alive> -->
         <router-view></router-view>
+        <!-- </keep-alive> -->
       </transition>
     </div>
 
-
+    <!-- 底部导航 -->
     <footer class="footer clear" :class="{ 'leave': leaveComp }">
       <div class="footer-item" :class="{ 'active': isActive('home') }" @click="open('/home')">
         <p class="icon">
@@ -113,6 +115,6 @@
 
 
 <style lang="sass" type="text/sass">
-  @import "./assets/sass/public";
-  @import './assets/font/iconfont.css';
+  @import "./assets/sass/public"
+  @import './assets/font/iconfont.css'
 </style>

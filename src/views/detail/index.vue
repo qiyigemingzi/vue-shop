@@ -24,7 +24,7 @@
         </div>
 
         <div class="touch-item-box">
-          <div class="touch-item">
+          <div class="touch-item" @click='setSku()'>
             <span class="key">已选</span>
             {{ info.chouse }}
           </div>
@@ -70,106 +70,193 @@
       </div>
     </div>
 
-
     <div class="loading-box" :class="{ 'active' : loaded }" v-show="hide">
-
       <span class="load-ani iconfont icon-jiazai"></span>
-
     </div>
-
+    <van-sku
+       v-model="showSku"
+      :sku="sku"
+      :goods="goods"
+      :goods-id="goodsId"
+      :hide-stock="sku.hide_stock"
+      :quota="quota"
+      :quota-used="quotaUsed"
+      :reset-stepper-on-hide="resetStepperOnHide"
+      :reset-selected-sku-on-hide="resetSelectedSkuOnHide"
+      :close-on-click-overlay="closeOnClickOverlay"
+      :disable-stepper-input="disableStepperInput"
+      :message-config="messageConfig"
+      @buy-clicked="onBuyClicked"
+      @add-cart="onAddCartClicked"
+    />
   </div>
 </template>
 
 <script type="text/ecmascript-6">
-  import swiper from '../../components/swiper'
-  import axios from 'axios'
-  import Parabola from '../../util/parabola/index'
-  import { mapGetters } from 'vuex'
-  import ShopCarTool from '../../util/shop-car-tool'
+import swiper from "../../components/swiper";
+import axios from "axios";
+import Parabola from "../../util/parabola/index";
+import { mapGetters } from "vuex";
+import ShopCarTool from "../../util/shop-car-tool";
+import { Sku } from "vant";
+import Vue from "vue";
+Vue.use(Sku);
 
-
-
-  export default{
-    name: 'detail',
-    data() {
-      return {
-        info: {},
-        loaded: false,
-        hide: true
-      }
-    },
-    watch:{
-      $route () {
-        this.getData();
-      }
-    },
-    components: {
-      swiper
-    },
-    computed: {
-      ...mapGetters([
-        'getShopCarLength'
-      ])
-    },
-    methods: {
-      getData() {
-        this.loaded = false;
-        this.hide = true;
-
-        var id = this.$router.currentRoute.params.id;
-
-        if(!id){
-          this.$router.replace('/error/404')
-        }
-        axios.get('./static/server/'+id+'.json')
-          .then(response=> {
-
-            this.info = response.data;
-            this.loaded = true;
-            setTimeout(()=>{
-              this.hide = false
-            }, 1000)
-          })
-          .catch(error=> {
-            this.$router.replace('/error/404')
-          });
-      },
-      addShopCar() {
-
-        var root = this
-        var width = document.documentElement.clientWidth || document.body.clientWidth
-        root.$refs.bool.style.display = 'block'
-
-        var parabola = new Parabola({
-          startPos: {
-            left: root.$refs.bool.offsetLeft,
-            top: root.$refs.bool.offsetTop
-          },
-          endPos: {
-            left: root.$refs.bool.offsetLeft - (4.1 * width / 10),
-            top: root.$refs.bool.offsetTop
-          },
-          duration: 300,
-          onStep (pos) {
-            var position = 'translate3d('+(pos.left - root.$refs.bool.offsetLeft)+'px,'+(pos.top - root.$refs.bool.offsetTop)+'px, 0px)'
-
-            root.$refs.bool.style.webKitTransform = position
-            root.$refs.bool.style.transform = position
-          },
-          onFinish (pos) {
-            root.$refs.bool.style.display = 'none'
-            root.shopCar.add( root.info )
+export default {
+  name: "detail",
+  data() {
+    return {
+      showSku:false, //是否显示sku 组件
+      sku: {
+        // 所有sku规格类目与其值的从属关系，比如商品有颜色和尺码两大类规格，颜色下面又有红色和蓝色两个规格值。
+        // 可以理解为一个商品可以有多个规格类目，一个规格类目下可以有多个规格值。
+        tree: [
+          {
+            k: '颜色', // skuKeyName：规格类目名称
+            v: [
+              {
+                id: '30349', // skuValueId：规格值 id
+                name: '红色', // skuValueName：规格值名称
+                imgUrl: 'https://img.yzcdn.cn/1.jpg' // 规格类目图片，只有第一个规格类目可以定义图片
+              },
+              {
+                id: '1215',
+                name: '蓝色',
+                imgUrl: 'https://img.yzcdn.cn/2.jpg'
+              }
+            ],
+            k_s: 's1' // skuKeyStr：sku 组合列表（下方 list）中当前类目对应的 key 值，value 值会是从属于当前类目的一个规格值 id
           }
-        });
-
-        parabola.start();
-      }
+        ],
+        // 所有 sku 的组合列表，比如红色、M 码为一个 sku 组合，红色、S 码为另一个组合
+        list: [
+          {
+            id: 2259, // skuId，下单时后端需要
+            price: 100, // 价格（单位分）
+            s1: '1215', // 规格类目 k_s 为 s1 的对应规格值 id
+            s2: '1193', // 规格类目 k_s 为 s2 的对应规格值 id
+            s3: '0', // 最多包含3个规格值，为0表示不存在该规格
+            stock_num: 110 // 当前 sku 组合对应的库存
+          }
+        ],
+        price: '1.00', // 默认价格（单位元）
+        stock_num: 227, // 商品总库存
+        collection_id: 2261, // 无规格商品 skuId 取 collection_id，否则取所选 sku 组合对应的 id
+        none_sku: false, // 是否无规格商品
+        messages: [
+          {
+            // 商品留言
+            datetime: '0', // 留言类型为 time 时，是否含日期。'1' 表示包含
+            multiple: '0', // 留言类型为 text 时，是否多行文本。'1' 表示多行
+            name: '留言', // 留言名称
+            type: 'text', // 留言类型，可选: id_no（身份证）, text, tel, date, time, email
+            required: '0' // 是否必填 '1' 表示必填
+          }
+        ],
+        hide_stock: false // 是否隐藏剩余库存
+      },
+     goods: {
+      // 商品标题
+      title: '测试商品',
+      // 默认商品 sku 缩略图
+      picture: 'https://img.yzcdn.cn/1.jpg'
     },
-    mounted() {
-      this.shopCar = new ShopCarTool(this.$store)
+      goodsId:'',
+      quota:0, //限购数0表示不限购 
+      quotaUsed:0,//已经购买过的数量
+      resetStepperOnHide:false,//窗口隐藏时重置选择的商品数量
+      resetSelectedSkuOnHide:false, //窗口隐藏时重置已选择的sku
+      closeOnClickOverlay:true,//点击popup的overlay后是否关闭弹窗
+      disableStepperInput:false,//是否禁用sku中stepper的input框
+      messageConfig:{},//留言相关配置
+      info: {},
+      loaded: false,
+      hide: true
+    };
+  },
+  watch: {
+    $route() {
       this.getData();
     }
+  },
+  components: {
+    swiper
+  },
+  computed: {
+    ...mapGetters(["getShopCarLength"])
+  },
+  methods: {
+    getData() {
+      this.loaded = false;
+      this.hide = true;
+
+      var id = 1001;
+      axios
+        .get("./static/server/" + id + ".json")
+        .then(response => {
+          this.info = response.data;
+          this.loaded = true;
+          setTimeout(() => {
+            this.hide = false;
+          }, 1500);
+        })
+        .catch(error => {
+          // this.$router.replace('/error/404')
+        });
+    },
+    //设置sku
+    setSku(){
+      this.showSku = true;
+    },
+    //点击购买的回调
+    onBuyClicked(){
+      console.log('点击购买的回调')
+    },
+    //点击添加购物车回调
+    onAddCartClicked(){
+      console.log('点击购买的回调')
+    },
+    addShopCar() {
+      var root = this;
+      var width =
+      document.documentElement.clientWidth || document.body.clientWidth;
+      root.$refs.bool.style.display = "block";
+
+      var parabola = new Parabola({
+        startPos: {
+          left: root.$refs.bool.offsetLeft,
+          top: root.$refs.bool.offsetTop
+        },
+        endPos: {
+          left: root.$refs.bool.offsetLeft - 4.1 * width / 10,
+          top: root.$refs.bool.offsetTop
+        },
+        duration: 300,
+        onStep(pos) {
+          var position =
+            "translate3d(" +
+            (pos.left - root.$refs.bool.offsetLeft) +
+            "px," +
+            (pos.top - root.$refs.bool.offsetTop) +
+            "px, 0px)";
+
+          root.$refs.bool.style.webKitTransform = position;
+          root.$refs.bool.style.transform = position;
+        },
+        onFinish(pos) {
+          root.$refs.bool.style.display = "none";
+          root.shopCar.add(root.info);
+        }
+      });
+
+      parabola.start();
+    }
+  },
+  mounted() {
+    this.shopCar = new ShopCarTool(this.$store);
+    this.getData();
   }
+};
 </script>
 
 <style type="text/sass" lang="sass">

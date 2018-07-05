@@ -1,8 +1,8 @@
 <template>
   <div class="swiper-container vue-swiper" ref="swiper">
     <div class="swiper-wrapper">
-      <div class="swiper-slide" v-for="(x, index) in list">
-        <a href="javascript:;" @click="x.href ? $router.openPage(x.href) : ''"><img :src="x.src" :alt="x.alt || 'img'+index"></a>
+      <div class="swiper-slide" v-for="(item, index) in list" :key='index'>
+        <a href="javascript:;" @click="item.ad_link ? $router.openPage(item.href) : ''"><img :src="item.ad_code" :alt="item.ad_name || 'img'+index"></a>
       </div>
     </div>
     <!-- 如果需要分页器 -->
