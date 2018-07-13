@@ -8,23 +8,23 @@
       </div>
 
       <div class="content">
-        <div class="hot">
+        <!-- <div class="hot">
           <img :src="info.hot" @click="$router.openPage(info.hotLink)" alt="">
-        </div>
+        </div> -->
         <div class="title-box">
-          <h3>{{ info.title }}</h3>
-          <p style="color:#ff4a00">{{ info.bigContent }}</p>
+          <h3>{{ goods.title }}</h3>
+          <p style="color:#ff4a00">{{ goods.goods_remark }}</p>
           <p style="color: #757575"> {{ info.smallContent }} </p>
 
           <div class="press">
-            <span class="money" v-if="info.money">￥{{ info.money }}</span>
-            <span class="no-money" v-if="info.noMoney">￥{{ info.noMoney }}</span>
-            <span class="tips" v-for="target in info.tips">{{ target }}</span>
+            <span class="money" v-if="goods.shop_price">￥{{ goods.shop_price }}</span>
+            <span class="no-money" v-if="goods.market_price">￥{{ goods.market_price }}</span>
+            <span class="tips" v-if='( goods.market_price-goods.shop_price ) > 0 '>直降{{ goods.market_price-goods.shop_price }}￥</span>
           </div>
         </div>
 
         <div class="touch-item-box">
-          <div class="touch-item" @click='setSku()'>
+          <div class="touch-item" @click='showSku = true'>
             <span class="key">已选</span>
             {{ info.chouse }}
           </div>
@@ -73,6 +73,7 @@
     <div class="loading-box" :class="{ 'active' : loaded }" v-show="hide">
       <span class="load-ani iconfont icon-jiazai"></span>
     </div>
+
     <van-sku
        v-model="showSku"
       :sku="sku"
@@ -86,6 +87,7 @@
       :close-on-click-overlay="closeOnClickOverlay"
       :disable-stepper-input="disableStepperInput"
       :message-config="messageConfig"
+      :initial-sku="initialSku"
       @buy-clicked="onBuyClicked"
       @add-cart="onAddCartClicked"
     />
@@ -93,11 +95,13 @@
 </template>
 
 <script type="text/ecmascript-6">
+
 import swiper from "../../components/swiper";
 import axios from "axios";
 import Parabola from "../../util/parabola/index";
 import { mapGetters } from "vuex";
 import ShopCarTool from "../../util/shop-car-tool";
+import { api_goods_details } from "../../util/api/home.js";
 import { Sku } from "vant";
 import Vue from "vue";
 Vue.use(Sku);
@@ -107,47 +111,26 @@ export default {
   data() {
     return {
       showSku:false, //是否显示sku 组件
+       initialSku: { 
+        s1: '42',
+        s2: '47',
+        s3: '51'
+      },
       sku: {
         // 所有sku规格类目与其值的从属关系，比如商品有颜色和尺码两大类规格，颜色下面又有红色和蓝色两个规格值。
         // 可以理解为一个商品可以有多个规格类目，一个规格类目下可以有多个规格值。
-        tree: [
-          {
-            k: '颜色', // skuKeyName：规格类目名称
-            v: [
-              {
-                id: '30349', // skuValueId：规格值 id
-                name: '红色', // skuValueName：规格值名称
-                imgUrl: 'https://img.yzcdn.cn/1.jpg' // 规格类目图片，只有第一个规格类目可以定义图片
-              },
-              {
-                id: '1215',
-                name: '蓝色',
-                imgUrl: 'https://img.yzcdn.cn/2.jpg'
-              }
-            ],
-            k_s: 's1' // skuKeyStr：sku 组合列表（下方 list）中当前类目对应的 key 值，value 值会是从属于当前类目的一个规格值 id
-          }
-        ],
+        tree: [],
         // 所有 sku 的组合列表，比如红色、M 码为一个 sku 组合，红色、S 码为另一个组合
-        list: [
-          {
-            id: 2259, // skuId，下单时后端需要
-            price: 100, // 价格（单位分）
-            s1: '1215', // 规格类目 k_s 为 s1 的对应规格值 id
-            s2: '1193', // 规格类目 k_s 为 s2 的对应规格值 id
-            s3: '0', // 最多包含3个规格值，为0表示不存在该规格
-            stock_num: 110 // 当前 sku 组合对应的库存
-          }
-        ],
-        price: '1.00', // 默认价格（单位元）
-        stock_num: 227, // 商品总库存
-        collection_id: 2261, // 无规格商品 skuId 取 collection_id，否则取所选 sku 组合对应的 id
+        list: [],
+        price: '', // 默认价格（单位元）
+        stock_num: 0, // 商品总库存
+       collection_id: 81,  // 无规格商品 skuId 取 collection_id，否则取所选 sku 组合对应的 id
         none_sku: false, // 是否无规格商品
         messages: [
           {
             // 商品留言
             datetime: '0', // 留言类型为 time 时，是否含日期。'1' 表示包含
-            multiple: '0', // 留言类型为 text 时，是否多行文本。'1' 表示多行
+            multiple: '1', // 留言类型为 text 时，是否多行文本。'1' 表示多行
             name: '留言', // 留言名称
             type: 'text', // 留言类型，可选: id_no（身份证）, text, tel, date, time, email
             required: '0' // 是否必填 '1' 表示必填
@@ -159,7 +142,10 @@ export default {
       // 商品标题
       title: '测试商品',
       // 默认商品 sku 缩略图
-      picture: 'https://img.yzcdn.cn/1.jpg'
+      picture: 'https://img.yzcdn.cn/1.jpg',
+      goods_remark:'',
+      market_price:'',
+      shop_price:''
     },
       goodsId:'',
       quota:0, //限购数0表示不限购 
@@ -169,13 +155,18 @@ export default {
       closeOnClickOverlay:true,//点击popup的overlay后是否关闭弹窗
       disableStepperInput:false,//是否禁用sku中stepper的input框
       messageConfig:{},//留言相关配置
-      info: {},
+      info: {
+        banner:[], //轮播图
+      },
+      info1:{},
+      detailObj:{},
       loaded: false,
       hide: true
     };
   },
   watch: {
     $route() {
+      console.log('goods详情监听路由变化')
       this.getData();
     }
   },
@@ -184,6 +175,7 @@ export default {
   },
   computed: {
     ...mapGetters(["getShopCarLength"])
+   
   },
   methods: {
     getData() {
@@ -203,18 +195,68 @@ export default {
         .catch(error => {
           // this.$router.replace('/error/404')
         });
+
+        api_goods_details({id:this.goodsId}).then((res)=>{
+          console.log('商品详情的数据=',res)
+          this.detailObj = res.data;
+          this.setSku();
+          res.data.goods_images_list.forEach((v,i) => {
+            this.info.banner.push({
+              src:v.image_url,
+              link:'',
+              alt:''
+            })
+          });
+          
+          this.goods.title = res.data.goods.goods_name;
+           this.goods.picture = res.data.goods.original_img;
+           this.goods.goods_remark = res.data.goods.goods_remark;
+           this.goods.market_price = res.data.goods.market_price;
+           this.goods.shop_price = res.data.goods.shop_price;
+
+        }).catch((err)=>{
+
+        })
     },
     //设置sku
     setSku(){
-      this.showSku = true;
+      this.sku.price =  this.detailObj.goods.shop_price;
+      this.sku.stock_num =  this.detailObj.goods.store_count;
+       this.detailObj.filter_spec.forEach((v,i)=>{
+         this.sku.tree.push({
+            k: v.name, // skuKeyName：规格类目名称
+            v: [],
+            k_s: 's'+(i+1) // skuKeyStr：sku 组合列表（下方 list）中当前类目对应的 key 值，value 值会是从属于当前类目的一个规格值 id
+          })
+          v.data.forEach((val,index) => {
+            this.sku.tree[i].v.push({
+              id: val.item_id.toString(), // skuValueId：规格值 id
+              name: val.item, // skuValueName：规格值名称
+              imgUrl: val.src // 规格类目图片，只有第一个规格类目可以定义图片
+            })
+          });
+       })
+      let obj = this.detailObj.spec_goods_price;
+       for(let key in obj){
+         let sArr = key.split('_');
+          this.sku.list.push({
+            id: obj[key].item_id, // skuId，下单时后端需要
+            price: obj[key].price*100, // 价格（单位分）
+            s1: sArr.length>0 ? sArr[0] : '0', // 规格类目 k_s 为 s1 的对应规格值 id
+            s2: sArr.length>1 ? sArr[1] : '0', // 规格类目 k_s 为 s2 的对应规格值 id
+            s3: sArr.length>2 ? sArr[2] : '0', // 最多包含3个规格值，为0表示不存在该规格
+            stock_num: obj[key].store_count // 当前 sku 组合对应的库存
+          })
+       }
+       console.log('sku=', this.sku);
     },
     //点击购买的回调
-    onBuyClicked(){
+    onBuyClicked(skuData){
       console.log('点击购买的回调')
     },
     //点击添加购物车回调
-    onAddCartClicked(){
-      console.log('点击购买的回调')
+    onAddCartClicked(skuData){
+      console.log('点击购买的回调',skuData)
     },
     addShopCar() {
       var root = this;
@@ -254,6 +296,7 @@ export default {
   },
   mounted() {
     this.shopCar = new ShopCarTool(this.$store);
+    this.goodsId = this.$route.query.id == undefined ? '' : this.$route.query.id;
     this.getData();
   }
 };

@@ -1,9 +1,9 @@
 <template>
   <div class="app-init pay-page scroll-box">
-    <header-back title="关于"></header-back>
+    <header-back title="确认订单"></header-back>
 
     <div class="padding-box">
-      <p>商城简介</p>
+      <p>确认订单</p>
       <p></p>
     </div>
 

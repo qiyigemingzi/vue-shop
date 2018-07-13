@@ -1,11 +1,6 @@
 # shop
 一个电商项目
 
-</div>
-<div align="center">
-  <a href="http://show.thisummer.com/mi">在线演示</a>
-</div>
-
 ## 安装
 ```
   cd  shop

@@ -9,24 +9,28 @@
       </div>
 
       <div class="shop-wrap shop-list-wrap" v-else>
-        <div class="shop-item clear" v-for="target in shopCarList">
-          <div class="shop-img fl" @click="$router.openPage(target.link)">
-            <img :src="target.img" alt="">
-          </div>
-          <div class="function-box fr">
-            <p class="title">{{ target.title }}</p>
-            <p class="money">售价：{{ target.money }}元</p>
-            <div class="button-group">
-              <div class="function-button">
-                <span class="btn jia iconfont icon-jia" @click="jia(target)"></span>
-                <span class="number">{{ target.length }}</span>
-                <span class="btn jian iconfont icon-jian" @click="jian(target)"></span>
+        <van-checkbox-group v-model="result" @change='change'>
+          <div class="shop-item clear" v-for="(target,index) in shopCarList" :key='index'>
+            <van-checkbox :key="target.money" :name="target">
+              <div class="shop-img fl" @click="$router.openPage(target.link)">
+                <img :src="target.img" alt="">
               </div>
+              <div class="function-box fr">
+                <p class="title">{{ target.title }}</p>
+                <p class="money">售价：{{ target.money }}元</p>
+                <div class="button-group">
+                  <div class="function-button">
+                    <span class="btn jia iconfont icon-jia" @click="jia(target)"></span>
+                    <span class="number">{{ target.length }}</span>
+                    <span class="btn jian iconfont icon-jian" @click="jian(target)"></span>
+                  </div>
+                  <span class="delete iconfont icon-del" @click="deleteShop(target)"></span>
+                </div>
+              </div>
+            </van-checkbox>
 
-              <span class="delete iconfont icon-del" @click="deleteShop(target)"></span>
-            </div>
           </div>
-        </div>
+        </van-checkbox-group>
 
       </div>
 
@@ -36,7 +40,7 @@
       <div class="shop-item">
         <div class="shop-box clear">
 
-          <div class="shop-box-item" v-for="target in shoplist" @click="$router.openPage(target.href)">
+          <div class="shop-box-item" v-for="(target,index) in shoplist" :key='index' @click="$router.openPage(target.href)">
             <img v-lazy="target.src" alt="">
             <p class="title">{{ target.title }}</p>
             <p class="con">{{ target.con }}</p>
@@ -51,8 +55,11 @@
 
     <div class="shopcar-footer" v-show="shopCarListLength>0">
       <div class="item money">
-        <p>共{{ shopCarListLength }}件 <span>金额</span></p>
-        <p> <span class="mm">{{ getAllMoney }}</span> 元 </p>
+        <p>共{{ shopCarListLength }}件
+          <span>金额</span>
+        </p>
+        <p>
+          <span class="mm">{{ getAllMoney }}</span> 元 </p>
       </div>
       <div class="item continue" @click="$router.openPage('/')">继续购物</div>
       <div class="item pay" @click="$router.openPage('/pay')">去结算</div>
@@ -61,99 +68,110 @@
 </template>
 
 <script type="text/ecmascript-6">
-  import headerBack from '../../components/header-back'
-  import ShopCarTool from '../../util/shop-car-tool/index'
-
-  export default{
-    name: 'shop-car',
-    components: {
-      headerBack
-    },
-    data() {
-      return {
-        shoplist : [
-          {
-            src: 'http://oz3tayfme.bkt.clouddn.com/show.liluo.cc/cf0b9ede4dbbc115f3d2d1b032e97d21.jpg',
-            title: '13.3"笔记本i5 独显',
-            con: '指纹解锁，全金属机身',
-            money: 5199,
-            href: '/detail/1006'
-          },
-          {
-            src: 'http://oz3tayfme.bkt.clouddn.com/show.liluo.cc/cf0b9ede4dbbc115f3d2d1b032e97d21.jpg',
-            title: '13.3"笔记本i5 独显',
-            con: '指纹解锁，全金属机身',
-            money: 5199,
-            href: '/detail/1006'
-          },
-          {
-            src: 'http://oz3tayfme.bkt.clouddn.com/show.liluo.cc/cf0b9ede4dbbc115f3d2d1b032e97d21.jpg',
-            title: '13.3"笔记本i5 独显',
-            con: '指纹解锁，全金属机身',
-            money: 5199,
-            href: '/detail/1006'
-          },
-          {
-            src: 'http://oz3tayfme.bkt.clouddn.com/show.liluo.cc/cf0b9ede4dbbc115f3d2d1b032e97d21.jpg',
-            title: '13.3"笔记本i5 独显',
-            con: '指纹解锁，全金属机身',
-            money: 5199,
-            href: '/detail/1006'
-          },
-          {
-            src: 'http://oz3tayfme.bkt.clouddn.com/show.liluo.cc/cf0b9ede4dbbc115f3d2d1b032e97d21.jpg',
-            title: '13.3"笔记本i5 独显',
-            con: '指纹解锁，全金属机身',
-            money: 5199,
-            href: '/detail/1006'
-          },
-          {
-            src: 'http://oz3tayfme.bkt.clouddn.com/show.liluo.cc/cf0b9ede4dbbc115f3d2d1b032e97d21.jpg',
-            title: '13.3"笔记本i5 独显',
-            con: '指纹解锁，全金属机身',
-            money: 5199,
-            href: '/detail/1006'
-          }
-        ],
-
-        shopCarList: {}
-      }
-    },
-    mounted() {
-      this.shopCar = new ShopCarTool(this.$store)
-      this.shopCarList = this.shopCar.getAll()
-
-      console.log(this.shopCarList)
-    },
-    computed: {
-      shopCarListLength() {
-        var n = 0;
-        for(var i in this.shopCarList){
-          n += this.shopCarList[i].length
+import headerBack from "../../components/header-back";
+import ShopCarTool from "../../util/shop-car-tool/index";
+import { Checkbox, CheckboxGroup } from "vant";
+Vue.use(Checkbox).use(CheckboxGroup);
+import Vue from "vue";
+export default {
+  name: "shop-car",
+  components: {
+    headerBack
+  },
+  data() {
+    return {
+      shoplist: [
+        {
+          src:
+            "http://oz3tayfme.bkt.clouddn.com/show.liluo.cc/cf0b9ede4dbbc115f3d2d1b032e97d21.jpg",
+          title: '13.3"笔记本i5 独显',
+          con: "指纹解锁，全金属机身",
+          money: 5199,
+          href: "/detail/1006"
+        },
+        {
+          src:
+            "http://oz3tayfme.bkt.clouddn.com/show.liluo.cc/cf0b9ede4dbbc115f3d2d1b032e97d21.jpg",
+          title: '13.3"笔记本i5 独显',
+          con: "指纹解锁，全金属机身",
+          money: 5199,
+          href: "/detail/1006"
+        },
+        {
+          src:
+            "http://oz3tayfme.bkt.clouddn.com/show.liluo.cc/cf0b9ede4dbbc115f3d2d1b032e97d21.jpg",
+          title: '13.3"笔记本i5 独显',
+          con: "指纹解锁，全金属机身",
+          money: 5199,
+          href: "/detail/1006"
+        },
+        {
+          src:
+            "http://oz3tayfme.bkt.clouddn.com/show.liluo.cc/cf0b9ede4dbbc115f3d2d1b032e97d21.jpg",
+          title: '13.3"笔记本i5 独显',
+          con: "指纹解锁，全金属机身",
+          money: 5199,
+          href: "/detail/1006"
+        },
+        {
+          src:
+            "http://oz3tayfme.bkt.clouddn.com/show.liluo.cc/cf0b9ede4dbbc115f3d2d1b032e97d21.jpg",
+          title: '13.3"笔记本i5 独显',
+          con: "指纹解锁，全金属机身",
+          money: 5199,
+          href: "/detail/1006"
+        },
+        {
+          src:
+            "http://oz3tayfme.bkt.clouddn.com/show.liluo.cc/cf0b9ede4dbbc115f3d2d1b032e97d21.jpg",
+          title: '13.3"笔记本i5 独显',
+          con: "指纹解锁，全金属机身",
+          money: 5199,
+          href: "/detail/1006"
         }
-        return n
-      },
-      getAllMoney(){
-        var n = 0;
-        for(var i in this.shopCarList){
-          n += this.shopCarList[i].money * this.shopCarList[i].length
-        }
-        return n
+      ],
+      result: [], //多选框选择的列表
+      shopCarList: {}
+    };
+  },
+  mounted() {
+    this.shopCar = new ShopCarTool(this.$store);
+    this.shopCarList = this.shopCar.getAll();
+
+    console.log('this.shopCarList =',this.shopCarList);
+  },
+  computed: {
+    shopCarListLength() {
+      var n = 0;
+      for (var i in this.shopCarList) {
+        n += this.shopCarList[i].length;
       }
+      return n;
     },
-    methods: {
-      jia(target) {
-        this.shopCar.add(target)
-      },
-      jian(target) {
-        this.shopCar.minus(target)
-      },
-      deleteShop(target){
-        this.shopCar.remove(target.id)
-        this.shopCarList = this.shopCar.getAll()
+    getAllMoney() {
+      var n = 0;
+      for (var i in this.shopCarList) {
+        n += this.shopCarList[i].money * this.shopCarList[i].length;
       }
+      return n;
+    }
+  },
+  methods: {
+    jia(target) {
+      this.shopCar.add(target);
+    },
+    jian(target) {
+      this.shopCar.minus(target);
+    },
+    deleteShop(target) {
+      this.shopCar.remove(target.id);
+      this.shopCarList = this.shopCar.getAll();
+    },
+    change(v) {
+      console.log(v);
     }
   }
+};
 </script>
 
 <style type="text/sass" lang="sass">

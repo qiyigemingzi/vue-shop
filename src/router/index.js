@@ -55,7 +55,7 @@ export default new Router({
       }
     },
     {
-      path: '/detail/:id',
+      path: '/detail',
       name: 'detail',
       component(resolve){
         require(['@/views/detail/index.vue'], resolve)
