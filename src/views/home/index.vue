@@ -60,7 +60,7 @@
 
       <div class="shop-item">
         <div class="shop-box clear">
-          <van-list v-model="loading" :finished="finished" @load="onLoad">
+          <van-list v-model="loading" :finished="finished" @load="onLoad" >
             <div class="shop-box-item" v-for="(target,index) in shoplist" @click="$router.openPage('/detail',{id:target.goods_id})" :key='index'>
               <img v-lazy="target.original_img" alt="">
               <p class="title">{{ target.goods_name }}</p>

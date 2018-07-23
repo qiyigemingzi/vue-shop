@@ -74,34 +74,32 @@
       <span class="load-ani iconfont icon-jiazai"></span>
     </div>
 
-    <van-sku
-       v-model="showSku"
-      :sku="sku"
-      :goods="goods"
-      :goods-id="goodsId"
-      :hide-stock="sku.hide_stock"
-      :quota="quota"
-      :quota-used="quotaUsed"
-      :reset-stepper-on-hide="resetStepperOnHide"
-      :reset-selected-sku-on-hide="resetSelectedSkuOnHide"
-      :close-on-click-overlay="closeOnClickOverlay"
-      :disable-stepper-input="disableStepperInput"
-      :message-config="messageConfig"
-      :initial-sku="initialSku"
-      @buy-clicked="onBuyClicked"
-      @add-cart="onAddCartClicked"
-    />
+    <van-sku v-model="showSku" 
+    :sku="sku" 
+    :goods="goods"
+    :goods-id="goodsId"
+    :hide-stock="sku.hide_stock"
+    :quota="quota" :quota-used="quotaUsed"
+    :reset-stepper-on-hide="resetStepperOnHide"
+    :reset-selected-sku-on-hide="resetSelectedSkuOnHide" 
+    :close-on-click-overlay="closeOnClickOverlay"
+    :disable-stepper-input="disableStepperInput"
+    :message-config="messageConfig" 
+    :initial-sku="initialSku" 
+    @buy-clicked="onBuyClicked"
+    @add-cart="onAddCartClicked
+    " />
   </div>
 </template>
 
 <script type="text/ecmascript-6">
-
 import swiper from "../../components/swiper";
 import axios from "axios";
 import Parabola from "../../util/parabola/index";
 import { mapGetters } from "vuex";
 import ShopCarTool from "../../util/shop-car-tool";
 import { api_goods_details } from "../../util/api/home.js";
+import { api_add_cart } from "../../util/api/shopCart.js";
 import { Sku } from "vant";
 import Vue from "vue";
 Vue.use(Sku);
@@ -110,11 +108,11 @@ export default {
   name: "detail",
   data() {
     return {
-      showSku:false, //是否显示sku 组件
-       initialSku: { 
-        s1: '42',
-        s2: '47',
-        s3: '51'
+      showSku: false, //是否显示sku 组件
+      initialSku: {
+        s1: "",
+        s2: "",
+        s3: ""
       },
       sku: {
         // 所有sku规格类目与其值的从属关系，比如商品有颜色和尺码两大类规格，颜色下面又有红色和蓝色两个规格值。
@@ -122,51 +120,51 @@ export default {
         tree: [],
         // 所有 sku 的组合列表，比如红色、M 码为一个 sku 组合，红色、S 码为另一个组合
         list: [],
-        price: '', // 默认价格（单位元）
+        price: "", // 默认价格（单位元）
         stock_num: 0, // 商品总库存
-       collection_id: 81,  // 无规格商品 skuId 取 collection_id，否则取所选 sku 组合对应的 id
+        collection_id: 81, // 无规格商品 skuId 取 collection_id，否则取所选 sku 组合对应的 id
         none_sku: false, // 是否无规格商品
         messages: [
           {
             // 商品留言
-            datetime: '0', // 留言类型为 time 时，是否含日期。'1' 表示包含
-            multiple: '1', // 留言类型为 text 时，是否多行文本。'1' 表示多行
-            name: '留言', // 留言名称
-            type: 'text', // 留言类型，可选: id_no（身份证）, text, tel, date, time, email
-            required: '0' // 是否必填 '1' 表示必填
+            datetime: "0", // 留言类型为 time 时，是否含日期。'1' 表示包含
+            multiple: "1", // 留言类型为 text 时，是否多行文本。'1' 表示多行
+            name: "留言", // 留言名称
+            type: "text", // 留言类型，可选: id_no（身份证）, text, tel, date, time, email
+            required: "0" // 是否必填 '1' 表示必填
           }
         ],
         hide_stock: false // 是否隐藏剩余库存
       },
-     goods: {
-      // 商品标题
-      title: '测试商品',
-      // 默认商品 sku 缩略图
-      picture: 'https://img.yzcdn.cn/1.jpg',
-      goods_remark:'',
-      market_price:'',
-      shop_price:''
-    },
-      goodsId:'',
-      quota:0, //限购数0表示不限购 
-      quotaUsed:0,//已经购买过的数量
-      resetStepperOnHide:false,//窗口隐藏时重置选择的商品数量
-      resetSelectedSkuOnHide:false, //窗口隐藏时重置已选择的sku
-      closeOnClickOverlay:true,//点击popup的overlay后是否关闭弹窗
-      disableStepperInput:false,//是否禁用sku中stepper的input框
-      messageConfig:{},//留言相关配置
-      info: {
-        banner:[], //轮播图
+      goods: {
+        // 商品标题
+        title: "测试商品",
+        // 默认商品 sku 缩略图
+        picture: "https://img.yzcdn.cn/1.jpg",
+        goods_remark: "",
+        market_price: "",
+        shop_price: ""
       },
-      info1:{},
-      detailObj:{},
+      goodsId: "",
+      quota: 0, //限购数0表示不限购
+      quotaUsed: 0, //已经购买过的数量
+      resetStepperOnHide: false, //窗口隐藏时重置选择的商品数量
+      resetSelectedSkuOnHide: false, //窗口隐藏时重置已选择的sku
+      closeOnClickOverlay: true, //点击popup的overlay后是否关闭弹窗
+      disableStepperInput: false, //是否禁用sku中stepper的input框
+      messageConfig: {}, //留言相关配置
+      info: {
+        banner: [] //轮播图
+      },
+      info1: {},
+      detailObj: {},
       loaded: false,
       hide: true
     };
   },
   watch: {
     $route() {
-      console.log('goods详情监听路由变化')
+      console.log("goods详情监听路由变化");
       this.getData();
     }
   },
@@ -175,7 +173,6 @@ export default {
   },
   computed: {
     ...mapGetters(["getShopCarLength"])
-   
   },
   methods: {
     getData() {
@@ -196,72 +193,81 @@ export default {
           // this.$router.replace('/error/404')
         });
 
-        api_goods_details({id:this.goodsId}).then((res)=>{
-          console.log('商品详情的数据=',res)
+      api_goods_details({ id: this.goodsId })
+        .then(res => {
+          console.log("商品详情的数据=", res);
           this.detailObj = res.data;
           this.setSku();
-          res.data.goods_images_list.forEach((v,i) => {
+          res.data.goods_images_list.forEach((v, i) => {
             this.info.banner.push({
-              src:v.image_url,
-              link:'',
-              alt:''
-            })
+              src: v.image_url,
+              link: "",
+              alt: ""
+            });
           });
-          
+
           this.goods.title = res.data.goods.goods_name;
-           this.goods.picture = res.data.goods.original_img;
-           this.goods.goods_remark = res.data.goods.goods_remark;
-           this.goods.market_price = res.data.goods.market_price;
-           this.goods.shop_price = res.data.goods.shop_price;
-
-        }).catch((err)=>{
-
+          this.goods.picture = res.data.goods.original_img;
+          this.goods.goods_remark = res.data.goods.goods_remark;
+          this.goods.market_price = res.data.goods.market_price;
+          this.goods.shop_price = res.data.goods.shop_price;
         })
+        .catch(err => {});
     },
     //设置sku
-    setSku(){
-      this.sku.price =  this.detailObj.goods.shop_price;
-      this.sku.stock_num =  this.detailObj.goods.store_count;
-       this.detailObj.filter_spec.forEach((v,i)=>{
-         this.sku.tree.push({
-            k: v.name, // skuKeyName：规格类目名称
-            v: [],
-            k_s: 's'+(i+1) // skuKeyStr：sku 组合列表（下方 list）中当前类目对应的 key 值，value 值会是从属于当前类目的一个规格值 id
-          })
-          v.data.forEach((val,index) => {
-            this.sku.tree[i].v.push({
-              id: val.item_id.toString(), // skuValueId：规格值 id
-              name: val.item, // skuValueName：规格值名称
-              imgUrl: val.src // 规格类目图片，只有第一个规格类目可以定义图片
-            })
+    setSku() {
+      this.sku.price = this.detailObj.goods.shop_price;
+      this.sku.stock_num = this.detailObj.goods.store_count;
+      this.detailObj.filter_spec.forEach((v, i) => {
+        this.sku.tree.push({
+          k: v.name, // skuKeyName：规格类目名称
+          v: [],
+          k_s: "s" + (i + 1) // skuKeyStr：sku 组合列表（下方 list）中当前类目对应的 key 值，value 值会是从属于当前类目的一个规格值 id
+        });
+        v.data.forEach((val, index) => {
+          this.sku.tree[i].v.push({
+            id: val.item_id.toString(), // skuValueId：规格值 id
+            name: val.item, // skuValueName：规格值名称
+            imgUrl: val.src // 规格类目图片，只有第一个规格类目可以定义图片
           });
-       })
+        });
+      });
       let obj = this.detailObj.spec_goods_price;
-       for(let key in obj){
-         let sArr = key.split('_');
-          this.sku.list.push({
-            id: obj[key].item_id, // skuId，下单时后端需要
-            price: obj[key].price*100, // 价格（单位分）
-            s1: sArr.length>0 ? sArr[0] : '0', // 规格类目 k_s 为 s1 的对应规格值 id
-            s2: sArr.length>1 ? sArr[1] : '0', // 规格类目 k_s 为 s2 的对应规格值 id
-            s3: sArr.length>2 ? sArr[2] : '0', // 最多包含3个规格值，为0表示不存在该规格
-            stock_num: obj[key].store_count // 当前 sku 组合对应的库存
-          })
-       }
-       console.log('sku=', this.sku);
+      for (let key in obj) {
+        let sArr = key.split("_");
+        this.sku.list.push({
+          id: obj[key].item_id, // skuId，下单时后端需要
+          price: obj[key].price * 100, // 价格（单位分）
+          s1: sArr.length > 0 ? sArr[0] : "0", // 规格类目 k_s 为 s1 的对应规格值 id
+          s2: sArr.length > 1 ? sArr[1] : "0", // 规格类目 k_s 为 s2 的对应规格值 id
+          s3: sArr.length > 2 ? sArr[2] : "0", // 最多包含3个规格值，为0表示不存在该规格
+          stock_num: obj[key].store_count // 当前 sku 组合对应的库存
+        });
+      }
+      console.log("sku=", this.sku);
     },
     //点击购买的回调
-    onBuyClicked(skuData){
-      console.log('点击购买的回调')
+    onBuyClicked(skuData) {
+      console.log("点击购买的回调");
     },
     //点击添加购物车回调
-    onAddCartClicked(skuData){
-      console.log('点击购买的回调',skuData)
+    onAddCartClicked(skuData) {
+      console.log("添加购物车=", skuData);
+      api_add_cart({
+        openid:'oyP7DwOjfAEaqMiuBnK3c8O6MXvA1001',
+        goods_id: skuData.goodsId,
+        goods_num: skuData.selectedNum,
+        item_id: skuData.selectedSkuComb.id
+      }).then(res=>{
+        console.log("添加购物车成功的回调", res);
+      }).catch((err)=>{
+        console.log("添加购物车失败的回调", err);
+      })
     },
     addShopCar() {
       var root = this;
       var width =
-      document.documentElement.clientWidth || document.body.clientWidth;
+        document.documentElement.clientWidth || document.body.clientWidth;
       root.$refs.bool.style.display = "block";
 
       var parabola = new Parabola({
@@ -287,6 +293,7 @@ export default {
         },
         onFinish(pos) {
           root.$refs.bool.style.display = "none";
+          console.log(root.info);
           root.shopCar.add(root.info);
         }
       });
@@ -296,7 +303,8 @@ export default {
   },
   mounted() {
     this.shopCar = new ShopCarTool(this.$store);
-    this.goodsId = this.$route.query.id == undefined ? '' : this.$route.query.id;
+    this.goodsId =
+      this.$route.query.id == undefined ? "" : this.$route.query.id;
     this.getData();
   }
 };

@@ -31,8 +31,6 @@ class ShopCarTool{
       return
     }
 
-
-
     if(this.shopCarDB[key]){
       this.shopCarDB[key].length+=1
     }else{

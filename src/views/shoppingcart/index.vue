@@ -11,7 +11,7 @@
       <div class="shop-wrap shop-list-wrap" v-else>
         <van-checkbox-group v-model="result" @change='change'>
           <div class="shop-item clear" v-for="(target,index) in shopCarList" :key='index'>
-            <van-checkbox :key="target.money" :name="target">
+            <van-checkbox :key="target.money" :name="target">  </van-checkbox>
               <div class="shop-img fl" @click="$router.openPage(target.link)">
                 <img :src="target.img" alt="">
               </div>
@@ -27,14 +27,14 @@
                   <span class="delete iconfont icon-del" @click="deleteShop(target)"></span>
                 </div>
               </div>
-            </van-checkbox>
+          
 
           </div>
         </van-checkbox-group>
 
       </div>
 
-      <div class="gass-you-like">
+      <!-- <div class="gass-you-like">
         <img src="http://oz3tayfme.bkt.clouddn.com/show.liluo.cc/e95ade2750a7fde92369b416c7d3176d.jpg" alt="">
       </div>
       <div class="shop-item">
@@ -50,7 +50,7 @@
           </div>
 
         </div>
-      </div>
+      </div> -->
     </div>
 
     <div class="shopcar-footer" v-show="shopCarListLength>0">
@@ -71,6 +71,9 @@
 import headerBack from "../../components/header-back";
 import ShopCarTool from "../../util/shop-car-tool/index";
 import { Checkbox, CheckboxGroup } from "vant";
+import { api_cart_list } from "../../util/api/shopCart.js";
+
+
 Vue.use(Checkbox).use(CheckboxGroup);
 import Vue from "vue";
 export default {
@@ -137,7 +140,7 @@ export default {
   mounted() {
     this.shopCar = new ShopCarTool(this.$store);
     this.shopCarList = this.shopCar.getAll();
-
+    this.getCartList();
     console.log('this.shopCarList =',this.shopCarList);
   },
   computed: {
@@ -169,6 +172,16 @@ export default {
     },
     change(v) {
       console.log(v);
+    },
+    //获取购物车列表
+    getCartList(){
+      api_cart_list({
+        openid:'oyP7DwOjfAEaqMiuBnK3c8O6MXvA1001'
+      }).then(res=>{
+      console.log('购物车列表=',res)
+      }).catch(err=>{
+        console.log(err)
+      })
     }
   }
 };

@@ -1,5 +1,8 @@
 import axios from 'axios'
+var qs = require('qs');
 // import util from '../util/util.js'
+const CancelToken = axios.CancelToken;
+var cancel;
 import {Toast } from 'vant';
 
 // let token = util.str(util.getItem('token'));
@@ -7,6 +10,7 @@ import {Toast } from 'vant';
 let instance = axios.create({
     baseURL: 'http://www.wujiaweb.com' /* 服务器的根路径 */
 })
+// instance.defaults.headers.post['Content-Type'] = 'application/x-www-form-urlencoded;charset=UTF-8';
 // instance.defaults.headers.common['token'] = token;
 /* 过滤请求 */
 instance.interceptors.request.use((config) => {
@@ -30,4 +34,58 @@ instance.interceptors.response.use((res) => {
     return Promise.reject(res)
 })
 
-export default instance
+// instance.post_ = (url,params)=>{
+//     return new Promise((resolve, reject) => {
+//         instance.post(url,  qs.stringify(params))
+//           .then(response => {
+//             resolve(response.data);
+//           }, err => {
+//             reject(err);
+//           })
+//           .catch((error) => {
+//             reject(error)
+//           })
+//       })
+// }
+
+
+
+// export default instance
+export default{
+    //get请求
+    get(url,param){
+        return new Promise((resolve,reject)=>{
+            instance({
+                method:'get',
+                url,
+                params:param,
+                cancelToken:new CancelToken(c=>{
+                    cancel=c
+                })
+            }).then(res=>{  //axios返回的是一个promise对象
+                resolve(res)  //resolve在promise执行器内部 
+            }).catch(err=>{
+                reject(err);
+            })
+
+        })
+    },
+    //post请求
+    post(url,param){
+        return new Promise((resolve,reject)=>{
+            instance({
+                method:'post',
+                url,
+                data:qs.stringify(param),
+                cancelToken:new CancelToken(c=>{
+                    cancel=c
+                })
+            }).then(res=>{
+                resolve(res)
+            }).catch(err=>{
+                reject(err)
+                // console.log(err,'异常')
+            })
+        })
+    }
+}
